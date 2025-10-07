@@ -1,6 +1,5 @@
 import express from "express";
-import fetch from "node-fetch";
-import cheerio from "cheerio"; // 🧠 HTML parser
+import cheerio from "cheerio";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -26,7 +25,13 @@ app.get("/favsite", async (req, res) => {
     }
 
     // 🔍 Fetch HTML and parse for favicon
-    const htmlResponse = await fetch(url.href);
+    const htmlResponse = await fetch(url.href, {
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "text/html"
+      }
+    });
+
     if (!htmlResponse.ok) throw new Error(`Failed to fetch HTML: ${htmlResponse.status}`);
     const html = await htmlResponse.text();
     const $ = cheerio.load(html);
@@ -39,17 +44,24 @@ app.get("/favsite", async (req, res) => {
 
     // 🛠️ Resolve relative URLs
     const faviconUrl = new URL(faviconHref, url.origin).href;
+    console.log("Resolved favicon URL:", faviconUrl);
 
-    const faviconResponse = await fetch(faviconUrl);
+    const faviconResponse = await fetch(faviconUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "*/*"
+      }
+    });
+
     if (!faviconResponse.ok) throw new Error(`Failed to fetch favicon: ${faviconResponse.status}`);
 
     const contentType = faviconResponse.headers.get("content-type") || "image/x-icon";
     res.set("content-type", contentType);
     faviconResponse.body.pipe(res);
   } catch (err) {
-    console.error(err);
+    console.error("Error:", err.message);
     res.status(500).send("Error fetching favicon");
   }
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
