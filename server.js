@@ -1,10 +1,10 @@
 import express from "express";
-import cheerio from "cheerio";
+import { load } from "cheerio"; // ✅ Named import for ESM
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ✅ Allowed hostname
+// ✅ Whitelisted domain
 const ALLOWED_HOST = "http.cat";
 
 app.get("/favsite", async (req, res) => {
@@ -19,7 +19,7 @@ app.get("/favsite", async (req, res) => {
       return res.status(400).send("Only http/https URLs are allowed");
     }
 
-    // ✅ Check whitelist
+    // ✅ Enforce whitelist
     if (url.hostname !== ALLOWED_HOST) {
       return res.status(403).send("Domain not allowed");
     }
@@ -34,15 +34,15 @@ app.get("/favsite", async (req, res) => {
 
     if (!htmlResponse.ok) throw new Error(`Failed to fetch HTML: ${htmlResponse.status}`);
     const html = await htmlResponse.text();
-    const $ = cheerio.load(html);
+    const $ = load(html);
 
-    // 🧭 Try to find favicon link
+    // 🧭 Extract favicon link or fallback
     let faviconHref =
       $('link[rel="icon"]').attr("href") ||
       $('link[rel="shortcut icon"]').attr("href") ||
       "/favicon.ico";
 
-    // 🛠️ Resolve relative URLs
+    // 🛠️ Resolve relative URL
     const faviconUrl = new URL(faviconHref, url.origin).href;
     console.log("Resolved favicon URL:", faviconUrl);
 
