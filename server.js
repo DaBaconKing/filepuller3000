@@ -48,7 +48,8 @@ app.get("/favsite", async (req, res) => {
     if (!faviconResponse.ok) throw new Error(`Failed to fetch favicon: ${faviconResponse.status}`);
 
     const contentType = faviconResponse.headers.get("content-type") || "image/x-icon";
-    res.set("content-type", contentType);
+    res.set("Content-Type", contentType);
+    res.set("Cache-Control", "public, max-age=86400");
     faviconResponse.body.pipe(res);
   } catch (err) {
     console.error("Error:", err.message);
