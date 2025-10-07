@@ -1,11 +1,8 @@
 import express from "express";
-import { load } from "cheerio"; // ✅ Named import for ESM
+import { load } from "cheerio";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// ✅ Whitelisted domain
-const ALLOWED_HOST = "http.cat";
 
 app.get("/favsite", async (req, res) => {
   const target = req.query.target;
@@ -17,11 +14,6 @@ app.get("/favsite", async (req, res) => {
     // ✅ Validate protocol
     if (!/^https?:$/.test(url.protocol)) {
       return res.status(400).send("Only http/https URLs are allowed");
-    }
-
-    // ✅ Enforce whitelist
-    if (url.hostname !== ALLOWED_HOST) {
-      return res.status(403).send("Domain not allowed");
     }
 
     // 🔍 Fetch HTML and parse for favicon
@@ -64,4 +56,4 @@ app.get("/favsite", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Favicon fetcher running on port ${PORT}`));
